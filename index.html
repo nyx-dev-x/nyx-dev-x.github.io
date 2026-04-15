@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'><path fill='%23ff0000' d='M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 92.9-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.8-35.7-46.1-87.7-92.9-131.1C433.5 68.8 368.8 32 288 32zM128 256a160 160 0 1 1 320 0 160 160 0 1 1 -320 0zm160 80a80 80 0 1 0 0-160 80 80 0 1 0 0 160z'/></svg>">
+    <title>Perfil Dark Aesthetic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #ff0000;
+            --bg-dark: #050505;
+            --glass-bg: rgba(15, 15, 15, 0.5);
+            --glow-white: rgba(255, 255, 255, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(var(--primary-red) 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+        }
+
+        /* --- TELA DE ENTRADA & SEGREDOS --- */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+        #overlay h2 {
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            animation: pulseText 2s infinite;
+            text-align: center;
+            padding: 20px;
+        }
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.5; text-shadow: none; }
+            50% { opacity: 1; text-shadow: 0 0 10px white; }
+        }
+
+        #overlay.blocking {
+            cursor: default;
+            pointer-events: all;
+        }
+        #overlay.blocking ~ #player-wrapper {
+            pointer-events: all;
+            z-index: 10000;
+        }
+
+        /* --- PARTICULAS & FUNDO --- */
+        #canvas-particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glow-follow {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 0, 0, 0.15) 0%, transparent 50%);
+        }
+
+        /* --- MUSIC PLAYER --- */
+        #player-wrapper {
+            position: fixed;
+            top: 20px; right: 20px;
+            border-radius: 18px;
+            padding: 2.5px;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(-20px);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            max-width: 55px; 
+            height: 55px;
+            transition: max-width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 1s ease, transform 0.4s;
+            white-space: nowrap;
+            pointer-events: all;
+        }
+
+        #player-wrapper.open { max-width: 580px; }
+
+        #player-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, var(--primary-red));
+            animation: rotate-aura 4s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate-aura { 100% { transform: rotate(360deg); } }
+
+        #player-wrapper:hover {
+            transform: scale(1.03) !important;
+            box-shadow: 0 0 25px rgba(255,0,0,0.4);
+        }
+
+        #player-toggle-btn {
+            position: absolute;
+            top: 2.5px; left: 2.5px;
+            width: 50px; height: 50px;
+            background: rgba(12, 12, 12, 0.95);
+            border-radius: 16px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            color: var(--primary-red);
+            font-size: 1.5rem;
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+        #player-wrapper.open #player-toggle-btn { opacity: 0; pointer-events: none; }
+
+        #music-player {
+            background: rgba(12, 12, 12, 0.95);
+            border-radius: 16px;
+            padding: 0 25px 0 20px;
+            display: flex; align-items: center; gap: 15px;
+            font-family: 'Segoe UI', sans-serif;
+            min-width: 420px; height: 50px; cursor: default;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.5s ease 0.3s;
+        }
+        
+        #player-wrapper.open #music-player { opacity: 1; visibility: visible; }
+        
+        .song-info { pointer-events: none; }
+        .song-info marquee { width: 140px; font-size: 0.85rem; font-weight: bold; pointer-events: auto; }
+        
+        .controls { display: flex; align-items: center; gap: 10px; }
+        .controls i, #mute-icon { cursor: pointer; transition: 0.3s; text-shadow: 0 0 5px transparent; }
+        .controls i:hover, #mute-icon:hover { 
+            color: var(--primary-red); text-shadow: 0 0 10px var(--primary-red); transform: scale(1.25); 
+        }
+
+        input[type=range] {
+            -webkit-appearance: none; width: 80px; height: 4px;
+            background: #333; border-radius: 5px; outline: none; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 12px; height: 12px;
+            border-radius: 50%; background: white; box-shadow: 0 0 10px white; cursor: pointer;
+        }
+        #progress-bar { width: 100px; }
+        .time-display { font-size: 0.75rem; color: #aaa; }
+
+        /* --- PERFIL PRINCIPAL --- */
+        #main-content {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease;
+            z-index: 1;
+            perspective: 1000px;
+        }
+
+        .profile-card {
+            position: relative;
+            width: 380px;
+            padding: 2.5px;
+            background: transparent;
+            border-radius: 20px; 
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            transition: transform 0.1s linear, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Camada independente para a Aura que não afeta o resto do perfil */
+        .animated-border {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 20px;
+            overflow: hidden; 
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .animated-border::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, var(--primary-red));
+            animation: rotate-aura 4s linear infinite;
+        }
+
+        .card-content { 
+            position: relative;
+            z-index: 1;
+            background: #080808;
+            padding: 90px 40px 40px 40px;
+            border-radius: 18px; 
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(15px);
+        }
+
+        .banner {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 142px;
+            background: url('59459-hannah.jpg') center/cover;
+            z-index: 0;
+            border-top-left-radius: 18px; 
+            border-top-right-radius: 18px;
+        }
+
+        /* --- CAIXA DE VIEWS --- */
+        .views-badge-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .views-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .views-badge i {
+            font-size: 0.8rem;
+            color: var(--primary-red);
+            animation: eye-blink 4s infinite;
+        }
+
+        .views-badge-wrapper:hover .views-badge {
+            color: #fff;
+            border-color: var(--primary-red);
+            background: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        @keyframes eye-blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        .avatar-container {
+            width: 105px; height: 105px;
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            border: 2px solid var(--primary-red);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .avatar { width: 125%; height: 125%; object-fit: cover; }
+
+        .name-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- TREMOR NO NOME ツ --- */
+        h1 { 
+            font-size: 2.2rem; 
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(90deg, #fff, var(--primary-red), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: aura-flow 3s linear infinite, name-tremble 5s infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        @keyframes aura-flow {
+            to { background-position: 200% center; }
+        }
+
+        @keyframes name-tremble {
+            0%, 94%, 100% { transform: translate(0, 0) rotate(0deg); }
+            95% { transform: translate(-2px, 1px) rotate(-3deg); }
+            96% { transform: translate(2px, -1px) rotate(3deg); }
+            97% { transform: translate(-2px, -1px) rotate(-3deg); }
+            98% { transform: translate(2px, 1px) rotate(3deg); }
+            99% { transform: translate(-1px, 0) rotate(0deg); }
+        }
+
+        .verified-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        
+        .tooltip {
+            position: absolute; top: -35px; background: rgba(0, 0, 0, 0.9); color: #fff;
+            padding: 5px 10px; border-radius: 5px; font-size: 0.75rem; font-family: 'Segoe UI', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px; opacity: 0; pointer-events: none;
+            transition: all 0.3s ease; border: 1px solid rgba(255, 0, 0, 0.5);
+            transform: translateY(10px); white-space: nowrap; font-weight: bold;
+            z-index: 100;
+        }
+        
+        .verified-wrapper:hover .tooltip, .views-badge-wrapper:hover .tooltip, .icon-wrapper:hover .tooltip { 
+            opacity: 1; transform: translateY(0); 
+        }
+
+        .verified-badge { color: var(--primary-red); font-size: 1.1rem; filter: drop-shadow(0 0 5px rgba(255,0,0,0.5)); }
+
+        .badges { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; position: relative; z-index: 2;}
+        .badge { background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 5px; font-size: 0.7rem; border: 1px solid rgba(255, 0, 0, 0.3); font-family: 'Segoe UI', sans-serif;}
+        
+        .description { font-size: 0.9rem; color: #ccc; line-height: 1.6; margin-bottom: 10px; position: relative; z-index: 2;}
+        .location-secret { font-size: 0.75rem; color: var(--primary-red); margin-bottom: 25px; display: flex; justify-content: center; align-items: center; gap: 6px; position: relative; z-index: 2;}
+        .location-secret i { color: var(--primary-red); }
+        
+        .social-icons { display: flex; justify-content: center; gap: 25px; margin-top: 10px; position: relative; z-index: 2;}
+        .icon-wrapper {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            animation: icon-float 3s ease-in-out infinite;
+        }
+        .social-icons a {
+            color: rgba(255, 255, 255, 0.6); font-size: 1.6rem; text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .icon-wrapper:hover .fa-discord { color: #5865F2; filter: drop-shadow(0 0 10px #5865F2); }
+        .icon-wrapper:hover .fa-steam { color: #ffffff; filter: drop-shadow(0 0 10px #ffffff); }
+        .icon-wrapper:hover .fa-spotify { color: #1DB954; filter: drop-shadow(0 0 10px #1DB954); }
+        .icon-wrapper:hover .fa-github { color: #f0f6fc; filter: drop-shadow(0 0 10px #ffffff); }
+        .social-icons a:hover { transform: scale(1.3) translateY(-5px); }
+
+        @keyframes icon-float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); }
+        }
+
+        #credits {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            cursor: default;
+        }
+        #credits:hover {
+            color: var(--primary-red);
+            transform: scale(1.2);
+            text-shadow: 0 0 10px var(--primary-red);
+        }
+
+        .typing-text {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--primary-red);
+            animation: blink-caret 0.75s step-end infinite;
+        }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--primary-red); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="yt-player" style="display: none;"></div>
+
+    <div id="overlay">
+        <h2 id="overlay-text">[ Click to reveal ]</h2>
+    </div>
+
+    <div class="glow-follow" id="glow"></div>
+    <canvas id="canvas-particles"></canvas>
+
+    <div id="player-wrapper">
+        <div id="player-toggle-btn">
+            <i class="fa-solid fa-wave-square"></i>
+        </div>
+
+        <div id="music-player">
+            <div class="song-info"><marquee id="song-title-marquee" scrollamount="4">Carregando Faixa...</marquee></div>
+            <span class="time-display" id="current-time">0:00</span>
+            <input type="range" id="progress-bar" value="0" min="0" max="100">
+            <span class="time-display" id="total-time">0:00</span>
+            
+            <div class="controls">
+                <i class="fa-solid fa-backward-step" id="prev-btn"></i>
+                <i class="fa-solid fa-play" id="play-pause-btn"></i>
+                <i class="fa-solid fa-forward-step" id="next-btn"></i>
+            </div>
+            
+            <i class="fa-solid fa-volume-high" id="mute-icon" style="margin-left: 10px;"></i>
+            <input type="range" id="volume-slider" value="50" min="0" max="100">
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="profile-card" id="card">
+            
+            <div class="animated-border"></div>
+
+            <div class="card-content">
+                
+                <div class="banner"></div>
+
+                <div class="views-badge-wrapper">
+                    <span class="tooltip">VIEWS</span>
+                    <div class="views-badge">
+                        <i class="fa-solid fa-eye"></i>
+                        <span>12,403</span>
+                    </div>
+                </div>
+
+                <div class="avatar-container">
+                    <img src="https://i.pinimg.com/736x/c4/57/67/c45767c43f00698f16a04bee8fd5d1f6.jpg" alt="Avatar" class="avatar">
+                </div>
+                
+                <div class="name-container">
+                    <h1>ツ</h1>
+                    <div class="verified-wrapper">
+                        <span class="tooltip">VERIFIED</span>
+                        <i class="fa-solid fa-circle-check verified-badge"></i>
+                    </div>
+                </div>
+                
+                <div class="badges">
+                    <span class="badge">Developer</span>
+                    <span class="badge">Designer</span>
+                </div>
+                <p class="description">"Ich kaufe SIM-Karte Lyca..."<br>Welcome to the dark side.</p>
+                
+                <div class="location-secret">
+                    <i class="fa-solid fa-location-dot"></i> secret
+                </div>
+
+                <div class="social-icons">
+                    <div class="icon-wrapper">
+                        <span class="tooltip">Discord</span>
+                        <a onclick="secretReveal('Discord')"><i class="fa-brands fa-discord"></i></a>
+                    </div>
+                    <div class="icon-wrapper">
+                        <span class="tooltip">Steam</span>
+                        <a onclick="secretReveal('Steam')"><i class="fa-brands fa-steam"></i></a>
+                    </div>
+                    <div class="icon-wrapper" style="animation-delay: 0.5s;">
+                        <span class="tooltip">Spotify</span>
+                        <a onclick="secretReveal('Spotify')"><i class="fa-brands fa-spotify"></i></a>
+                    </div>
+                    <div class="icon-wrapper" style="animation-delay: 1s;">
+                        <span class="tooltip">GitHub</span>
+                        <a onclick="secretReveal('GitHub')"><i class="fa-brands fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">created by ツ</div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player;
+        let isPlaying = false;
+        
+        const playlist = ['g4TVB-K67mo', 'MiN3eJwFxvg', 'PGfSaVDymjk', 'BwmuvqFzfLI', 'qGlwgPb8E7I', 'AYeLloU1qjI']; 
+        let currentSongIndex = 0;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('yt-player', {
+                height: '0', width: '0', 
+                videoId: playlist[currentSongIndex],
+                playerVars: { 'autoplay': 0, 'controls': 0 },
+                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        function onPlayerReady(event) {
+            player.setVolume(50);
+            document.getElementById('volume-slider').value = 50;
+            
+            document.getElementById('volume-slider').addEventListener('input', (e) => {
+                const val = e.target.value;
+                player.setVolume(val);
+                
+                if (val > 0) {
+                    isMuted = false;
+                    muteIcon.className = 'fa-solid fa-volume-high';
+                } else {
+                    isMuted = true;
+                    muteIcon.className = 'fa-solid fa-volume-xmark';
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            setInterval(() => {
+                if (isPlaying && player.getDuration) {
+                    const duration = player.getDuration();
+                    const current = player.getCurrentTime();
+                    if(duration > 0) {
+                        document.getElementById('progress-bar').value = (current / duration) * 100;
+                        document.getElementById('current-time').innerText = formatTime(current);
+                        document.getElementById('total-time').innerText = formatTime(duration);
+                    }
+                }
+            }, 1000);
+
+            document.getElementById('progress-bar').addEventListener('input', (e) => {
+                const duration = player.getDuration();
+                const seekTo = duration * (e.target.value / 100);
+                player.seekTo(seekTo);
+            });
+        }
+
+        function formatTime(time) {
+            const m = Math.floor(time / 60), s = Math.floor(time % 60);
+            return m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                document.getElementById('play-pause-btn').className = 'fa-solid fa-pause';
+                isPlaying = true;
+                const videoData = player.getVideoData();
+                if(videoData && videoData.title) {
+                    document.getElementById('song-title-marquee').innerText = videoData.title;
+                }
+            } 
+            else if (event.data == YT.PlayerState.ENDED) {
+                playNextSong();
+            } 
+            else {
+                document.getElementById('play-pause-btn').className = 'fa-solid fa-play';
+                isPlaying = false;
+            }
+        }
+
+        function playNextSong() {
+            currentSongIndex = (currentSongIndex + 1) % playlist.length;
+            player.loadVideoById(playlist[currentSongIndex]);
+        }
+
+        function playPrevSong() {
+            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+            player.loadVideoById(playlist[currentSongIndex]);
+        }
+
+        document.getElementById('play-pause-btn').addEventListener('click', () => isPlaying ? player.pauseVideo() : player.playVideo());
+        document.getElementById('next-btn').addEventListener('click', playNextSong);
+        document.getElementById('prev-btn').addEventListener('click', playPrevSong);
+
+        const muteIcon = document.getElementById('mute-icon');
+        const volumeSlider = document.getElementById('volume-slider');
+        let isMuted = false;
+        let lastVolume = 50;
+
+        function toggleMute(forceMute) {
+            if (forceMute || !isMuted) {
+                lastVolume = player.getVolume() > 0 ? player.getVolume() : 50;
+                player.mute();
+                isMuted = true;
+                muteIcon.className = 'fa-solid fa-volume-xmark';
+                volumeSlider.value = 0;
+            } else {
+                player.unMute();
+                player.setVolume(lastVolume);
+                isMuted = false;
+                muteIcon.className = 'fa-solid fa-volume-high';
+                volumeSlider.value = lastVolume;
+            }
+        }
+        muteIcon.addEventListener('click', () => toggleMute());
+
+        const playerToggleBtn = document.getElementById('player-toggle-btn');
+        const playerWrapper = document.getElementById('player-wrapper');
+
+        playerToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            playerWrapper.classList.add('open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (playerWrapper.classList.contains('open') && !playerWrapper.contains(e.target)) {
+                playerWrapper.classList.remove('open');
+            }
+        });
+
+        const overlay = document.getElementById('overlay');
+        const overlayText = document.getElementById('overlay-text');
+        const mainContent = document.getElementById('main-content');
+
+        function typeWriterEffect(element, text, speed, callback) {
+            let i = 0;
+            element.innerHTML = ''; 
+            element.classList.add('typing-text'); 
+
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    element.classList.remove('typing-text'); 
+                    if (callback) callback();
+                }
+            }
+            type();
+        }
+
+        overlay.addEventListener('click', () => {
+            if (overlay.style.opacity === '0' || overlay.dataset.clicked || overlay.classList.contains('blocking')) return;
+            overlay.dataset.clicked = "true";
+            
+            overlayText.style.display = 'none'; 
+            
+            const terminal = document.createElement('div');
+            terminal.style.color = 'var(--primary-red)';
+            terminal.style.fontFamily = "'Courier New', Courier, monospace";
+            terminal.style.fontSize = '0.9rem';
+            terminal.style.textAlign = 'left';
+            terminal.style.width = '80%';
+            terminal.style.maxWidth = '500px';
+            terminal.style.lineHeight = '1.6';
+            terminal.style.textShadow = '0 0 8px var(--primary-red)';
+            overlay.appendChild(terminal);
+            
+            const lines = [
+                "root@system:~$ ./execute_dark_aesthetic.sh",
+                "[*] Bypassing proxy layers...",
+                "[*] Accessing mainframe...",
+                "[+] Security bypassed successfully.",
+                "[*] Decrypting user data...",
+                "[+] Welcome to the dark side."
+            ];
+            
+            let currentLine = 0;
+
+            function printNextLine() {
+                if (currentLine < lines.length) {
+                    const lineSpan = document.createElement('span');
+                    terminal.appendChild(lineSpan);
+                    
+                    typeWriterEffect(lineSpan, lines[currentLine], 30, () => {
+                        terminal.appendChild(document.createElement('br'));
+                        currentLine++;
+                        setTimeout(printNextLine, 100 + Math.random() * 200); 
+                    });
+                } else {
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => { 
+                            overlay.style.visibility = 'hidden'; 
+                            terminal.remove(); 
+                            overlayText.style.display = 'block'; 
+                            overlayText.innerText = '[ Click to reveal ]';
+                            overlay.dataset.clicked = ''; 
+                        }, 1000);
+                        
+                        mainContent.style.opacity = '1';
+                        mainContent.style.transform = 'scale(1)';
+                        
+                        playerWrapper.style.opacity = '1';
+                        playerWrapper.style.transform = 'translateY(0) scale(1)';
+                        
+                        if(player && player.playVideo) player.playVideo();
+                    }, 800);
+                }
+            }
+
+            printNextLine(); 
+        });
+
+        function secretReveal(name) {
+            if (overlay.classList.contains('blocking')) return; 
+
+            overlayText.innerText = `[ SECRET: ${name.toUpperCase()}... ]`;
+            overlay.style.visibility = 'visible';
+            overlay.style.opacity = '1';
+            overlay.classList.add('blocking'); 
+
+            mainContent.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => { 
+                    overlay.style.visibility = 'hidden'; 
+                    overlayText.innerText = '[ Click to reveal ]';
+                    overlay.classList.remove('blocking'); 
+                    mainContent.style.pointerEvents = 'all'; 
+                }, 1000);
+            }, 2000); 
+        }
+
+        const card = document.getElementById('card');
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+            const rx = ((y - rect.height/2) / (rect.height/2)) * -15;
+            const ry = ((x - rect.width/2) / (rect.width/2)) * 15;
+            card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1.02)`;
+            card.style.transition = 'none';
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transition = 'transform 0.5s ease';
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        });
+
+        const glow = document.getElementById('glow');
+        document.body.addEventListener('mousemove', (e) => {
+            glow.style.setProperty('--x', e.clientX + 'px');
+            glow.style.setProperty('--y', e.clientY + 'px');
+        });
+
+        const canvas = document.getElementById('canvas-particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let particlesArray = [];
+        const mouse = { x: null, y: null };
+
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.x; mouse.y = e.y;
+            for (let i = 0; i < 2; i++) particlesArray.push(new Particle());
+        });
+
+        class Particle {
+            constructor() {
+                this.x = mouse.x; this.y = mouse.y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = 'rgba(255, 0, 0, 0.8)';
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.size > 0.1) this.size -= 0.05;
+            }
+            draw() {
+                ctx.fillStyle = this.color; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update(); particlesArray[i].draw();
+                if (particlesArray[i].size <= 0.2) { particlesArray.splice(i, 1); i--; }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        const originalTitle = "Perfil Dark Aesthetic";
+        let titleCharIndex = 0;
+        let titleDeleting = false;
+
+        function typeWriterTitle() {
+            let currentText = originalTitle.substring(0, titleCharIndex);
+            
+            document.title = currentText || "\u200E"; 
+
+            if (!titleDeleting && titleCharIndex < originalTitle.length) {
+                titleCharIndex++;
+                setTimeout(typeWriterTitle, 250);
+            } else if (titleDeleting && titleCharIndex > 0) {
+                titleCharIndex--;
+                setTimeout(typeWriterTitle, 100);
+            } else {
+                titleDeleting = !titleDeleting;
+                setTimeout(typeWriterTitle, titleDeleting ? 2000 : 1000); 
+            }
+        }
+        typeWriterTitle();
+    </script>
+</body>
+</html>
