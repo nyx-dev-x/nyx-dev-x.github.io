@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🪬 nyx-dev-x
+# 🪬 Welcome 🪬
 
-<img src="https://capsule-render.vercel.app/render?type=glitch&color=ff0000&height=120&section=header&text=WELCOME%20TO%20THE%20VOID&fontSize=40&animation=fadeIn" width="100%" />
+<img src="https://cdn.pfps.gg/pfps/2663-bmw-m3-drift.gif" width="20%" />
 
 ### 🌑 "Ich kaufe SIM-Karte Lyca..." 🌑
 
 ---
-
+This website created for fun :)
 ### 📂 [Visit my Live Profile](https://nyx-dev-x.github.io)
 
 ---
@@ -26,12 +26,16 @@
 
 <br>
 
-<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJmZzR6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/Lp71Uqhzn28qvMdG5v/giphy.gif" width="150px">
-
 ---
 
 ### 🕸️ Find me on
 [![](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com)
 [![](https://img.shields.io/badge/Steam-000000?style=for-the-badge&logo=steam&logoColor=white)](https://steamcommunity.com)
+
+<img src="https://cdn.pfps.gg/banners/5330-cat.gif" width="50%" />
+
+<br>
+
+### Bye
 
 </div>
