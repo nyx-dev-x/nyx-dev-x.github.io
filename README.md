@@ -7,7 +7,9 @@
 ### 🌑 "Ich kaufe SIM-Karte Lyca..." 🌑
 
 ---
-This website created for fun :)
+This website was created for fun :)  
+<sub>Inspired by [fakecrime.bio](https://fakecrime.bio)</sub>
+
 ### 📂 [Visit my Live Profile](https://nyx-dev-x.github.io)
 
 ---
